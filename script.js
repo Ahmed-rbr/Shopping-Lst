@@ -1,5 +1,6 @@
 const form = document.querySelector(".form");
 const itemList = document.getElementById("item-list");
+const filter = document.getElementById("filter");
 const subBtn = document.querySelector(".btn");
 const ClearBtn = document.querySelector(".btn-clear");
 const iteams = [];
@@ -15,6 +16,27 @@ const addIteamToList = () => {
 
     form.reset();
   }
+};
+
+const filterResult = () => {
+  const filterValue = filter.value.trim().toLowerCase();
+
+  const listItems = Array.from(itemList.children);
+  if (filterValue === "") {
+    listItems.forEach((item) => {
+      item.style.display = "flex";
+    });
+    return;
+  }
+  listItems.forEach((item) => {
+    const itemValue = item.textContent.trim().toLowerCase();
+
+    if (itemValue.includes(filterValue)) {
+      item.style.display = "flex";
+    } else {
+      item.style.display = "none";
+    }
+  });
 };
 
 const deletIteam = (e) => {
@@ -64,3 +86,4 @@ subBtn.addEventListener("click", (e) => {
 
 itemList.addEventListener("click", deletIteam);
 ClearBtn.addEventListener("click", clearAll);
+filter.addEventListener("keyup", filterResult);
