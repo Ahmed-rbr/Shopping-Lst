@@ -38,11 +38,12 @@ const storeEditeItem = (value) => {
   }
   localStorage.setItem("iteams", JSON.stringify(iteams));
   initializePage();
-  subBtn.style.background = "#333";
-  subBtn.textContent = "Add item";
-
   isEdite = false;
   editId = null;
+
+  subBtn.style.background = "#333";
+  subBtn.textContent = "Add item";
+  console.log(subBtn.childNodes);
 };
 
 const editIteam = (e) => {
@@ -53,11 +54,14 @@ const editIteam = (e) => {
     const id = targetItem.dataset.id;
     isEdite = true;
     editId = id;
-    itemInput.value = targetItem.firstChild.textContent.trim();
+    itemInput.value = targetItem.querySelector("span").textContent.trim();
+    subBtn.style.background = "green";
+
     subBtn.textContent = "Edit item";
+
     subBtn.style.background = "green";
     targetItem.firstChild.style.background = "#fceeee";
-    console.log(editId);
+    console.log(subBtn.childNodes);
   }
 };
 const showFeedBack = () => {
@@ -149,6 +153,7 @@ const creatIteam = (value) => {
   iteams.push(item);
   localStorage.setItem("iteams", JSON.stringify(iteams));
   showFeedBack();
+  initializePage();
 };
 
 const initializePage = () => {
@@ -156,7 +161,7 @@ const initializePage = () => {
   iteams.forEach((item) => {
     const listItem = document.createElement("li");
     listItem.dataset.id = item.id;
-    listItem.textContent = item.value;
+    cretSpan(listItem, item.value);
     creatDeletIteamBtn(listItem);
     itemList.appendChild(listItem);
   });
@@ -171,6 +176,11 @@ const creatDeletIteamBtn = (iteam) => {
   iteam.appendChild(deletBtn);
 };
 
+const cretSpan = (parent, value) => {
+  const textSpan = document.createElement("span");
+  textSpan.textContent = value;
+  parent.appendChild(textSpan);
+};
 subBtn.addEventListener("click", (e) => {
   e.preventDefault();
   addIteamToList();
