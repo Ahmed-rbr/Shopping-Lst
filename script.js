@@ -2,19 +2,47 @@ const form = document.querySelector(".form");
 const itemList = document.getElementById("item-list");
 const filter = document.getElementById("filter");
 const subBtn = document.querySelector(".btn");
+const noIteam = document.querySelector(".noIteam");
 const ClearBtn = document.querySelector(".btn-clear");
-const iteams = [];
+
+let iteams = [];
+try {
+  const storedItems = localStorage.getItem("iteams");
+  iteams = storedItems ? JSON.parse(storedItems) : [];
+} catch (e) {
+  console.warn("Failed to parse iteams from localStorage, resetting it.");
+  localStorage.removeItem("iteams");
+  iteams = [];
+}
 
 const addIteamToList = () => {
   const formData = new FormData(form);
   for (let [name, value] of formData.entries()) {
     if (value.trim() === "") {
+      alert("Please enter a value");
+
       return;
     }
 
     creatIteam(value);
+  }
+  form.reset();
+};
 
-    form.reset();
+const showFeedBack = () => {
+  const noItemsMessage = itemList.querySelector(".noIteam");
+
+  if (!noItemsMessage) {
+    if (iteams.length === 0) {
+      const noItemsMessage = document.createElement("li");
+      noItemsMessage.classList.add("noIteam");
+      noItemsMessage.textContent = "no items";
+      itemList.appendChild(noItemsMessage);
+    }
+  } else {
+    if (noItemsMessage) {
+      noItemsMessage.remove();
+    }
   }
 };
 
@@ -29,6 +57,8 @@ const filterResult = () => {
     return;
   }
   listItems.forEach((item) => {
+    if (item.classList.contains("noIteam")) return;
+
     const itemValue = item.textContent.trim().toLowerCase();
 
     if (itemValue.includes(filterValue)) {
@@ -51,24 +81,45 @@ const deletIteam = (e) => {
     item.remove();
     console.log(iteams);
   }
+  localStorage.setItem("iteams", JSON.stringify(iteams));
+
+  showFeedBack();
 };
 
 const clearAll = () => {
   iteams.length = 0;
-  itemList.innerHTML = "";
+  itemList.innerHTML = ``;
+  console.log(iteams);
+  localStorage.setItem("iteams", JSON.stringify(iteams));
+
+  showFeedBack();
 };
 
 const creatIteam = (value) => {
   const listItaem = document.createElement("li");
-  const itemId = `item-${Date.now()}`;
-  listItaem.id = itemId;
+  const itemId = `item-${crypto.randomUUID()}`;
+  listItaem.dataset.id = itemId;
+
   listItaem.textContent = value;
   creatDeletIteamBtn(listItaem);
 
   itemList.appendChild(listItaem);
-  iteams.push({ id: itemId, value: value });
+  const item = { id: itemId, value: value };
+  iteams.push(item);
+  localStorage.setItem("iteams", JSON.stringify(iteams));
+  showFeedBack();
 };
-
+const initializePage = () => {
+  itemList.innerHTML = "";
+  iteams.forEach((item) => {
+    const listItem = document.createElement("li");
+    listItem.dataset.id = item.id;
+    listItem.textContent = item.value;
+    creatDeletIteamBtn(listItem);
+    itemList.appendChild(listItem);
+  });
+  showFeedBack();
+};
 const creatDeletIteamBtn = (iteam) => {
   const deletBtn = document.createElement("button");
   deletBtn.classList.add("remove-item", "btn-link", "text-red");
@@ -86,4 +137,5 @@ subBtn.addEventListener("click", (e) => {
 
 itemList.addEventListener("click", deletIteam);
 ClearBtn.addEventListener("click", clearAll);
-filter.addEventListener("keyup", filterResult);
+filter.addEventListener("input", filterResult);
+initializePage();
