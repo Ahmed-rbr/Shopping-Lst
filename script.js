@@ -96,11 +96,19 @@ const clearAll = () => {
 };
 
 const creatIteam = (value) => {
+  const isDuplicate = iteams.some(
+    (item) => item.value.toLowerCase() === value.toLowerCase()
+  );
+  if (isDuplicate) {
+    alert("Item already exists!");
+    return;
+  }
   const listItaem = document.createElement("li");
   const itemId = `item-${crypto.randomUUID()}`;
   listItaem.dataset.id = itemId;
 
   listItaem.textContent = value;
+
   creatDeletIteamBtn(listItaem);
 
   itemList.appendChild(listItaem);
