@@ -2,33 +2,64 @@ const form = document.querySelector(".form");
 const itemList = document.getElementById("item-list");
 const filter = document.getElementById("filter");
 const subBtn = document.querySelector(".btn");
-const noIteam = document.querySelector(".noIteam");
+const subBtnIcon = subBtn.querySelector("i");
 const ClearBtn = document.querySelector(".btn-clear");
-
+const itemInput = form.querySelector(".form-input");
+let isEdite = false;
+let editId = null;
 let iteams = [];
-try {
-  const storedItems = localStorage.getItem("iteams");
-  iteams = storedItems ? JSON.parse(storedItems) : [];
-} catch (e) {
-  console.warn("Failed to parse iteams from localStorage, resetting it.");
-  localStorage.removeItem("iteams");
-  iteams = [];
-}
+const storedItems = localStorage.getItem("iteams");
+iteams = storedItems ? JSON.parse(storedItems) : [];
 
 const addIteamToList = () => {
   const formData = new FormData(form);
-  for (let [name, value] of formData.entries()) {
-    if (value.trim() === "") {
-      alert("Please enter a value");
 
+  for (let [name, value] of formData.entries()) {
+    value = value.trim();
+
+    if (value === "") {
+      alert("Please enter a value");
       return;
     }
 
-    creatIteam(value);
+    if (isEdite) {
+      storeEditeItem(value);
+    } else {
+      creatIteam(value);
+    }
   }
+
   form.reset();
 };
+const storeEditeItem = (value) => {
+  const index = iteams.findIndex((iteam) => iteam.id === editId);
+  if (index !== -1) {
+    iteams[index].value = value;
+  }
+  localStorage.setItem("iteams", JSON.stringify(iteams));
+  initializePage();
+  subBtn.style.background = "#333";
+  subBtn.textContent = "Add item";
 
+  isEdite = false;
+  editId = null;
+};
+
+const editIteam = (e) => {
+  if (e.target.classList.contains("noIteam")) return;
+
+  if (e.target.tagName === "LI") {
+    const targetItem = e.target;
+    const id = targetItem.dataset.id;
+    isEdite = true;
+    editId = id;
+    itemInput.value = targetItem.firstChild.textContent.trim();
+    subBtn.textContent = "Edit item";
+    subBtn.style.background = "green";
+    targetItem.firstChild.style.background = "#fceeee";
+    console.log(editId);
+  }
+};
 const showFeedBack = () => {
   const noItemsMessage = itemList.querySelector(".noIteam");
 
@@ -70,8 +101,10 @@ const filterResult = () => {
 };
 
 const deletIteam = (e) => {
+  if (iteams.length === 0) return;
   if (e.target.classList.contains("fa-xmark")) {
     const item = e.target.closest("li");
+
     const itemId = item.dataset.id;
     const index = iteams.findIndex((iteam) => iteam.id === itemId);
 
@@ -117,6 +150,7 @@ const creatIteam = (value) => {
   localStorage.setItem("iteams", JSON.stringify(iteams));
   showFeedBack();
 };
+
 const initializePage = () => {
   itemList.innerHTML = "";
   iteams.forEach((item) => {
@@ -133,7 +167,6 @@ const creatDeletIteamBtn = (iteam) => {
   deletBtn.classList.add("remove-item", "btn-link", "text-red");
   const icon = document.createElement("i");
   icon.classList.add("fa-solid", "fa-xmark");
-
   deletBtn.appendChild(icon);
   iteam.appendChild(deletBtn);
 };
@@ -146,4 +179,5 @@ subBtn.addEventListener("click", (e) => {
 itemList.addEventListener("click", deletIteam);
 ClearBtn.addEventListener("click", clearAll);
 filter.addEventListener("input", filterResult);
+itemList.addEventListener("click", editIteam);
 initializePage();
