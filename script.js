@@ -1,6 +1,7 @@
 const form = document.querySelector(".form");
 const itemList = document.getElementById("item-list");
 const subBtn = document.querySelector(".btn");
+const ClearBtn = document.querySelector(".btn-clear");
 const iteams = [];
 
 const addIteamToList = () => {
@@ -30,6 +31,11 @@ const deletIteam = (e) => {
   }
 };
 
+const clearAll = () => {
+  iteams.length = 0;
+  itemList.innerHTML = "";
+};
+
 const creatIteam = (value) => {
   const listItaem = document.createElement("li");
   const itemId = `item-${Date.now()}`;
@@ -57,3 +63,4 @@ subBtn.addEventListener("click", (e) => {
 });
 
 itemList.addEventListener("click", deletIteam);
+ClearBtn.addEventListener("click", clearAll);
